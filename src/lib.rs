@@ -5,7 +5,7 @@
 /* std use */
 use std::path::Path;
 use std::fs::File;
-use std::io::{BufReader, Read, Write};
+use std::io::Read;
 use std::slice::Iter;
 
 /* crate use */
@@ -15,8 +15,6 @@ use std::slice::Iter;
 
 
 /* module declaration */
-
-
 
 pub mod error;
 
@@ -41,7 +39,7 @@ pub fn read_magic_string(pos: &mut Iter<'_, u8>) -> Result<bool> {
 ///
 /// The `gt` version number is a 1 byte integer
 pub fn read_version_number(pos: &mut Iter<'_, u8>) -> Result<u8> {
-    let mut buffer = take_n_bytes(pos, 1);
+    let buffer = take_n_bytes(pos, 1);
     let version_number = buffer[0];
     Ok(version_number)
 }
@@ -57,7 +55,7 @@ pub enum Endianness {
 /// Read the integer endianness
 /// 0x00 for little-endian, 0x01 for big-endian
 pub fn read_endianness(pos: &mut Iter<'_, u8>) -> Result<Endianness> {
-    let mut buffer = take_n_bytes(pos, 1);
+    let buffer = take_n_bytes(pos, 1);
     let endianness_flag = buffer[0];
     let endianness = match endianness_flag {
         0x00 => Endianness::LittleEndian,
@@ -117,16 +115,16 @@ pub enum Error {
 }
 
 pub fn read_string(pos: &mut Iter<'_, u8>, endianness: Endianness) -> Result<String> {
-    let mut length_buffer = take_n_bytes(pos, 8); // length is encoded on 8 bytes
+    let length_buffer = take_n_bytes(pos, 8); // length is encoded on 8 bytes
     let length = bytes_to_u64(&length_buffer, endianness) as usize;
-    let mut string_buffer = take_n_bytes(pos, length);
+    let string_buffer = take_n_bytes(pos, length);
     let string = String::from_utf8(string_buffer).expect("Error: cannot parse UTF-8 string");
     Ok(string)
 }
 
 /// Read whether the graph is directed or undirected
 pub fn read_directed(pos: &mut Iter<'_, u8>) -> Result<bool> {
-    let mut flag = take_n_bytes(pos, 1);
+    let flag = take_n_bytes(pos, 1);
     Ok(is_directed(flag[0]))
 }
 
@@ -163,12 +161,12 @@ pub fn read_n_successors(pos: &mut Iter<'_, u8>, endianness: Endianness, n_bytes
 }
 
 /// Parse the edges
-pub fn read_edges(pos: &mut Iter<'_, u8>, endianness: Endianness) -> Result<Vec<Vec<usize>>> {
+pub fn read_edges(pos: &mut Iter<'_, u8>, endianness: Endianness) -> std::io::Result<Vec<Vec<usize>>> {
     let length_buffer = take_n_bytes(pos, 8);
     let n_nodes: usize = bytes_to_u64(&length_buffer, endianness).try_into().unwrap();
     let mut edges: Vec<Vec<usize>> = Vec::new();
     let n_bytes_per_node_identifier: usize = n_bytes_node_encoding(n_nodes).expect("Error: could not identify the number of bytes required to encode the node identifiers.");
-    for node in 0..n_nodes {
+    for _node in 0..n_nodes {
         let n_successors_buffer = take_n_bytes(pos, 8);
         let n_successors: usize = bytes_to_u64(&n_successors_buffer, endianness).try_into().unwrap();
         edges.push(read_n_successors(pos, endianness, n_bytes_per_node_identifier, n_successors).expect("Error: could not read edges"));
@@ -184,10 +182,10 @@ where P: AsRef<Path> {
     let mut buffer: Vec<u8> = Vec::new();
     let _read_bytes = file.read_to_end(&mut buffer);
     let mut bytes = buffer.iter();
-    read_magic_string(&mut bytes);
-    let version = read_version_number(&mut bytes);
+    read_magic_string(&mut bytes).expect("gt file format should start with the magic string \"⛾ gt\"");
+    let _version = read_version_number(&mut bytes);
     let endianness: Endianness = read_endianness(&mut bytes).unwrap();
-    let comment = read_string(&mut bytes, endianness);
+    let _comment = read_string(&mut bytes, endianness);
     let _directed: bool = read_directed(&mut bytes).unwrap();
     let edges = read_edges(&mut bytes, endianness).expect("Error reading edges");
     Ok(edges)

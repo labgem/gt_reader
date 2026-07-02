@@ -2,16 +2,16 @@
 name    = "gt_reader"
 version = "0.1.0"
 authors = [
-	"Samuel Ortion <>"
+	"Samuel Ortion <samuel@ortion.fr>"
 ]
 
 description  = "Read graph-tool gt compressed graph tool format"
 edition      = "2021"
 rust-version = "1.71"
 
-homepage      = "https://sortion.github.io/gt_reader"
-repository    = "https://github.com/sortion/gt_reader"
-documentation = "https://sortion.github.io/gt_reader"
+homepage      = "https://samuelortion.github.io/gt_reader"
+repository    = "https://github.com/samuelortion/gt_reader"
+documentation = "https://samuelortion.github.io/gt_reader"
 
 readme       = "README.md"
 license-file = "LICENSE"
@@ -44,10 +44,10 @@ default = []
 bench = []
 
 
-# [[bench]]
-# name              = "rev_comp"
-# required-features = ["bench"]
-# harness           = false
+[[bench]]
+name              = "gt_reader"
+required-features = ["bench"]
+harness           = false
 
 
 [profile.release]
