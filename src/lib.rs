@@ -102,7 +102,7 @@ pub fn bytes_to_int<T>(bytes: &Vec<u8>, endianness: Endianness, n_bytes_per_node
         1 => bytes_to_u8(bytes) as u64,
         2 => bytes_to_u16(bytes, endianness) as u64,
         4 => bytes_to_u32(bytes, endianness) as u64,
-        8 => bytes_to_u64(bytes, endianness) as u64,
+        8 => bytes_to_u64(bytes, endianness),
         _ => panic!("Error: support encoding on 1, 2, 4 or 8 bytes only.")
     }
 }
