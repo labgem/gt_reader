@@ -1,0 +1,63 @@
+[package]
+name    = "gt_reader"
+version = "0.1.0"
+authors = [
+	"Samuel Ortion <>"
+]
+
+description  = "Read graph-tool gt compressed graph tool format"
+edition      = "2021"
+rust-version = "1.71"
+
+homepage      = "https://sortion.github.io/gt_reader"
+repository    = "https://github.com/sortion/gt_reader"
+documentation = "https://sortion.github.io/gt_reader"
+
+readme       = "README.md"
+license-file = "LICENSE"
+
+
+[lib]
+name = "gt_reader"
+path = "src/lib.rs"
+
+
+[dependencies]
+
+## Error management
+thiserror  = { version = "1" }
+
+
+## Logging management
+log        = { version = "0.4" }
+petgraph = "0.8.3"
+
+
+[dev-dependencies]
+
+## Benchmark management
+criterion  = { version = "0.5" }
+
+
+[features]
+default = []
+bench = []
+
+
+# [[bench]]
+# name              = "rev_comp"
+# required-features = ["bench"]
+# harness           = false
+
+
+[profile.release]
+lto             = 'thin'
+opt-level       = 3
+overflow-checks = false
+panic           = 'abort'
+incremental     = false
+
+
+[profile.profiling]
+inherits = "release"
+debug    = true

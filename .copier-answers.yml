@@ -1,0 +1,16 @@
+# Changes here will be overwritten by Copier
+_commit: 1.9.2
+_src_path: ./template/copier-rust
+author_email: samuel@ortion.fr
+author_name: Samuel Ortion
+bin: false
+copyright_date: '2026'
+copyright_holder: Samuel Ortion
+copyright_holder_email: samuel@ortion.fr
+copyright_license: GPL-3.0
+forge_namespace: sortion
+forge_repo_name: gt_reader
+lib: true
+msrv: '1.71'
+project_description: Read graph-tool gt compressed graph tool format
+project_name: gt_reader

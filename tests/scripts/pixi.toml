@@ -1,0 +1,11 @@
+[workspace]
+authors = ["Samuel ORTION <samuel.ortion@genoscope.cns.fr>"]
+channels = ["conda-forge"]
+name = "scripts"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+graph-tool = ">=2.98,<3"

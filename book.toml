@@ -1,0 +1,19 @@
+[book]
+title        = "gt_reader"
+authors      = ["Samuel Ortion"]
+description  = "Read graph-tool gt compressed graph tool format"
+language     = "en"
+multilingual = false
+src          = "website"
+
+[build]
+build-dir      = "public"
+create-missing = false
+
+[output.html]
+smart-punctuation = true
+mathjax-support = true
+git-repository-url = "https://github.com/sortion/gt_reader/"
+git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/sortion/gt_reader/edit/main/docs/{path}"
+site-url = "https://gt_reader.github.io/gt_reader"
