@@ -6,6 +6,7 @@
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
+use std::slice::Iter;
 
 /* crate use */
 // use petgraph::graph::DiGraph;
@@ -15,18 +16,23 @@ use std::io::{BufReader, Read, Write};
 
 /* module declaration */
 
+
+
 pub mod error;
 
 /* project use */
 pub type Result<T, E = Error> = core::result::Result<T, E>;
 
+pub fn take_n_bytes(pos: &mut Iter<'_, u8>, n: usize) -> Vec<u8> {
+    pos.take(n).cloned().collect()
+}
+
 /// Read the `gt` magic string
 ///
 /// the magic string is utf-8 encoded
 /// it totalizes 6 bytes.
-pub fn read_magic_string(reader: &mut BufReader<File>) -> std::io::Result<bool> {
-    let mut buffer = vec![0u8; 6];
-    let _read_bytes = reader.read(&mut buffer)?;
+pub fn read_magic_string(pos: &mut Iter<'_, u8>) -> Result<bool> {
+    let buffer = take_n_bytes(pos, 6);
     let magic_string = "⛾ gt";
     Ok(buffer == magic_string.as_bytes().to_vec())
 }
@@ -34,9 +40,8 @@ pub fn read_magic_string(reader: &mut BufReader<File>) -> std::io::Result<bool> 
 /// Read the `gt` version number
 ///
 /// The `gt` version number is a 1 byte integer
-pub fn read_version_number(reader: &mut BufReader<File>) -> std::io::Result<u8> {
-    let mut buffer = vec![0u8; 1];
-    let _read_bytes = reader.read(&mut buffer)?;
+pub fn read_version_number(pos: &mut Iter<'_, u8>) -> Result<u8> {
+    let mut buffer = take_n_bytes(pos, 1);
     let version_number = buffer[0];
     Ok(version_number)
 }
@@ -51,9 +56,8 @@ pub enum Endianness {
 
 /// Read the integer endianness
 /// 0x00 for little-endian, 0x01 for big-endian
-pub fn read_endianness(reader: &mut BufReader<File>) -> std::io::Result<Endianness> {
-    let mut buffer = vec![0u8; 1];
-    let _read_bytes = reader.read(&mut buffer)?;
+pub fn read_endianness(pos: &mut Iter<'_, u8>) -> Result<Endianness> {
+    let mut buffer = take_n_bytes(pos, 1);
     let endianness_flag = buffer[0];
     let endianness = match endianness_flag {
         0x00 => Endianness::LittleEndian,
@@ -112,21 +116,17 @@ pub enum Error {
     }
 }
 
-pub fn read_string(reader: &mut BufReader<File>, endianness: Endianness) -> std::io::Result<String> {
-    let mut length_buffer = vec![0u8; 8]; // length is encoded on 8 bytes
-    let _read_bytes = reader.read(&mut length_buffer)?;
+pub fn read_string(pos: &mut Iter<'_, u8>, endianness: Endianness) -> Result<String> {
+    let mut length_buffer = take_n_bytes(pos, 8); // length is encoded on 8 bytes
     let length = bytes_to_u64(&length_buffer, endianness) as usize;
-    let mut string_buffer = vec![0u8; length];
-    let _read_bytes = reader.read(&mut string_buffer)?;
+    let mut string_buffer = take_n_bytes(pos, length);
     let string = String::from_utf8(string_buffer).expect("Error: cannot parse UTF-8 string");
-    dbg!(&string);
     Ok(string)
 }
 
 /// Read whether the graph is directed or undirected
-pub fn read_directed(reader: &mut BufReader<File>) -> std::io::Result<bool> {
-    let mut flag = vec![0u8; 1];
-    reader.read(&mut flag)?;
+pub fn read_directed(pos: &mut Iter<'_, u8>) -> Result<bool> {
+    let mut flag = take_n_bytes(pos, 1);
     Ok(is_directed(flag[0]))
 }
 
@@ -153,31 +153,25 @@ pub fn n_bytes_node_encoding(n_nodes: usize) -> Option<usize> {
 }
 
 /// Read edges
-pub fn read_n_successors(reader: &mut BufReader<File>, endianness: Endianness, n_bytes_per_node_identifier: usize, n_successors: usize) -> std::io::Result<Vec<usize>> {
-    let mut successors: Vec<usize> = Vec::new();
-    let mut node_identifier_buffer = vec![0u8; n_bytes_per_node_identifier];
+pub fn read_n_successors(pos: &mut Iter<'_, u8>, endianness: Endianness, n_bytes_per_node_identifier: usize, n_successors: usize) -> std::io::Result<Vec<usize>> {
+    let mut successors: Vec<usize> = Vec::with_capacity(n_successors);
     for _nodes in 0..n_successors {
-        let _read_bytes = reader.read(&mut node_identifier_buffer)?;
+        let node_identifier_buffer = take_n_bytes(pos, n_bytes_per_node_identifier);
         successors.push(bytes_to_int::<u64>(&node_identifier_buffer, endianness, n_bytes_per_node_identifier) as usize);
     }
     Ok(successors)
 }
 
 /// Parse the edges
-pub fn read_edges(reader: &mut BufReader<File>, endianness: Endianness) -> std::io::Result<Vec<Vec<usize>>> {
-    let mut length_buffer = vec![0u8; 8]; // length is encoded on 8 bytes
-    let _read_bytes = reader.read(&mut length_buffer)?;
+pub fn read_edges(pos: &mut Iter<'_, u8>, endianness: Endianness) -> Result<Vec<Vec<usize>>> {
+    let length_buffer = take_n_bytes(pos, 8);
     let n_nodes: usize = bytes_to_u64(&length_buffer, endianness).try_into().unwrap();
-    dbg!(&n_nodes);
     let mut edges: Vec<Vec<usize>> = Vec::new();
     let n_bytes_per_node_identifier: usize = n_bytes_node_encoding(n_nodes).expect("Error: could not identify the number of bytes required to encode the node identifiers.");
-    dbg!(&n_bytes_per_node_identifier);
     for node in 0..n_nodes {
-        dbg!(&node);
-        let mut n_successors_buffer = vec![0u8; 8];
-        let _read_bytes = reader.read(&mut n_successors_buffer);
+        let n_successors_buffer = take_n_bytes(pos, 8);
         let n_successors: usize = bytes_to_u64(&n_successors_buffer, endianness).try_into().unwrap();
-        edges.push(read_n_successors(reader, endianness, n_bytes_per_node_identifier, n_successors).expect("Error: could not read edges"));
+        edges.push(read_n_successors(pos, endianness, n_bytes_per_node_identifier, n_successors).expect("Error: could not read edges"));
     }
     Ok(edges)
 }
@@ -186,16 +180,16 @@ pub fn read_edges(reader: &mut BufReader<File>, endianness: Endianness) -> std::
 /// TODO support for undirected graph
 pub fn read_gt<P>(gt_path: P) -> std::io::Result<Vec<Vec<usize>>>
 where P: AsRef<Path> {
-    let file = File::open(gt_path)?;
-    let mut reader = BufReader::new(file);
-    read_magic_string(&mut reader)?;
-    let version = read_version_number(&mut reader)?;
-    dbg!(&version);
-    let endianness: Endianness = read_endianness(&mut reader)?;
-    let comment = read_string(&mut reader, endianness);
-    dbg!(&comment);
-    let directed: bool = read_directed(&mut reader).unwrap();
-    let edges = read_edges(&mut reader, endianness).expect("Error reading edges");
+    let mut file = File::open(gt_path)?;
+    let mut buffer: Vec<u8> = Vec::new();
+    let _read_bytes = file.read_to_end(&mut buffer);
+    let mut bytes = buffer.iter();
+    read_magic_string(&mut bytes);
+    let version = read_version_number(&mut bytes);
+    let endianness: Endianness = read_endianness(&mut bytes).unwrap();
+    let comment = read_string(&mut bytes, endianness);
+    let _directed: bool = read_directed(&mut bytes).unwrap();
+    let edges = read_edges(&mut bytes, endianness).expect("Error reading edges");
     Ok(edges)
 }
 
