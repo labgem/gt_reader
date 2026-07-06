@@ -44,12 +44,12 @@ where
     let directed: bool = reader::read_directed(&mut bytes).unwrap();
     let edges = reader::read_edges(&mut bytes, endianness).expect("Error reading edges");
     let mut graph = GraphToolGraph {
-        directed: directed,
-        edges: edges,
+        directed,
+        edges,
         edge_properties: PropertyMaps::new(),
         vertex_properties: PropertyMaps::new(),
         graph_properties: PropertyMaps::new(),
-        comment: comment,
+        comment,
     };
     graph.read_property_maps(&mut bytes, endianness);
     Ok(graph)

@@ -52,6 +52,12 @@ pub struct PropertyMaps<T> {
     pub key_to_type: HashMap<String, PropertyType>,
 }
 
+impl<T> Default for PropertyMaps<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> PropertyMaps<T> {
     pub fn new() -> Self {
         PropertyMaps {
