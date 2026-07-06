@@ -77,7 +77,7 @@ pub fn vec2array<T, const N: usize>(vec: Vec<T>) -> error::Result<[T; N]> {
         .map_err(|_| error::Error::MismatchedLength { expect: N })
 }
 
-pub fn bytes_to_u64(bytes: &Vec<u8>, endianness: Endianness) -> u64 {
+pub fn bytes_to_u64(bytes: &[u8], endianness: Endianness) -> u64 {
     let bytes: [u8; 8] = vec2array::<u8, 8>(bytes[..8].to_owned())
         .expect("Error: cannot convert Vec<u8> to [u8; 8]");
     match endianness {
@@ -86,7 +86,7 @@ pub fn bytes_to_u64(bytes: &Vec<u8>, endianness: Endianness) -> u64 {
     }
 }
 
-pub fn bytes_to_u32(bytes: &Vec<u8>, endianness: Endianness) -> u32 {
+pub fn bytes_to_u32(bytes: &[u8], endianness: Endianness) -> u32 {
     let bytes: [u8; 4] = vec2array::<u8, 4>(bytes[..4].to_owned())
         .expect("Error: cannot convert Vec<u8> to [u8; 4]");
     match endianness {
@@ -95,7 +95,7 @@ pub fn bytes_to_u32(bytes: &Vec<u8>, endianness: Endianness) -> u32 {
     }
 }
 
-pub fn bytes_to_u16(bytes: &Vec<u8>, endianness: Endianness) -> u16 {
+pub fn bytes_to_u16(bytes: &[u8], endianness: Endianness) -> u16 {
     let bytes: [u8; 2] = vec2array::<u8, 2>(bytes[..2].to_owned())
         .expect("Error: cannot convert Vec<u8> to [u8; 2]");
     match endianness {
@@ -104,12 +104,12 @@ pub fn bytes_to_u16(bytes: &Vec<u8>, endianness: Endianness) -> u16 {
     }
 }
 
-pub fn bytes_to_u8(bytes: &Vec<u8>) -> u8 {
+pub fn bytes_to_u8(bytes: &[u8]) -> u8 {
     bytes[0]
 }
 
 pub fn bytes_to_int<T>(
-    bytes: &Vec<u8>,
+    bytes: &[u8],
     endianness: Endianness,
     n_bytes_per_node_identifier: usize,
 ) -> error::Result<u64> {
