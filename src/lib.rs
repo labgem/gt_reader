@@ -1,5 +1,5 @@
 //! Read graph-tool gt compressed graph-tool graph format
-//! 
+//!
 //! ref. https://graph-tool.skewed.de/static/docs/stable/gt_format.html
 
 /* std use */
@@ -11,22 +11,19 @@ use std::path::Path;
 
 /* project use */
 
-use petgraph::Graph;
-
 use crate::property_maps::{PropertyMaps, PropertyMapsReader};
 
-
 pub mod error;
-pub mod reader;
 pub mod property_maps;
+pub mod reader;
 
 /// A object handling the datastructures that we can find in the gt file format
 pub struct GraphToolGraph {
     pub directed: bool, // true if the graph is directed, false if it is undirected
     pub edges: Vec<Vec<usize>>, // A vector of successor vertices for every vertex
     pub edge_properties: property_maps::PropertyMaps<(usize, usize)>, // for edge (u, v) key is (u, v)
-    pub vertex_properties: property_maps::PropertyMaps<usize>, // for vertex u, key is u
-    pub graph_properties: property_maps::PropertyMaps<usize>, // key is graph identifier
+    pub vertex_properties: property_maps::PropertyMaps<usize>,        // for vertex u, key is u
+    pub graph_properties: property_maps::PropertyMaps<usize>,         // key is graph identifier
     pub comment: String,
 }
 
@@ -58,7 +55,6 @@ where
     Ok(graph)
 }
 
-
 #[cfg(test)]
 mod tests {
     /* std use */
@@ -68,12 +64,10 @@ mod tests {
     /* project use */
     use super::*;
 
-
     /// Count the number of edges in a directed graph
     fn count_edges(edges: &Vec<Vec<usize>>) -> usize {
         edges.iter().map(|successors| successors.len()).sum()
     }
-
 
     #[test]
     fn read_pgp_gt() {
@@ -95,6 +89,9 @@ mod tests {
         let filename = "tests/test_data/pgp_graph_with_properties.gt";
         let graph = read_gt(filename).unwrap();
 
-        assert!(graph.vertex_properties.bool_maps.contains_key(&String::from("valid")))
+        assert!(graph
+            .vertex_properties
+            .bool_maps
+            .contains_key(&String::from("valid")))
     }
 }

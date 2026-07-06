@@ -10,7 +10,9 @@ use crate::GraphToolGraph;
 /* project use */
 
 use crate::reader::Endianness;
-use crate::reader::{read_bool, read_size, read_f64, read_i16, read_i32, read_i64, read_string, read_vector};
+use crate::reader::{
+    read_bool, read_f64, read_i16, read_i32, read_i64, read_size, read_string, read_vector,
+};
 
 /// First-class enum values representing supported types to read from gt format
 ///
@@ -47,10 +49,10 @@ pub struct PropertyMaps<T> {
     pub i64_vector_maps: HashMap<String, HashMap<T, Vec<i64>>>,
     pub f64_vector_maps: HashMap<String, HashMap<T, Vec<f64>>>,
     pub string_vector_maps: HashMap<String, HashMap<T, Vec<String>>>,
-    pub key_to_type: HashMap<String, PropertyType>
+    pub key_to_type: HashMap<String, PropertyType>,
 }
 
-impl <T> PropertyMaps <T> {
+impl<T> PropertyMaps<T> {
     pub fn new() -> Self {
         PropertyMaps {
             bool_maps: HashMap::new(),
@@ -138,7 +140,9 @@ impl PropertyMapsReader for GraphToolGraph {
         let map_key = read_string(pos, endianness).unwrap();
         if let Some(&map_type_flag) = pos.next() {
             let map_type = property_type_index_to_type(map_type_flag);
-            self.graph_properties.key_to_type.insert(map_key.clone(), map_type.clone());
+            self.graph_properties
+                .key_to_type
+                .insert(map_key.clone(), map_type.clone());
             match map_type {
                 PropertyType::Bool => {
                     let val = read_bool(pos, endianness).unwrap();
@@ -235,8 +239,10 @@ impl PropertyMapsReader for GraphToolGraph {
     fn read_vertex_property_map(&mut self, pos: &mut Iter<'_, u8>, endianness: Endianness) {
         let map_key = read_string(pos, endianness).unwrap();
         if let Some(&map_type_flag) = pos.next() {
-            let map_type =  property_type_index_to_type(map_type_flag);
-            self.vertex_properties.key_to_type.insert(map_key.clone(), map_type.clone());
+            let map_type = property_type_index_to_type(map_type_flag);
+            self.vertex_properties
+                .key_to_type
+                .insert(map_key.clone(), map_type.clone());
             match map_type {
                 PropertyType::Bool => {
                     let mut property_map = HashMap::new();
@@ -365,7 +371,9 @@ impl PropertyMapsReader for GraphToolGraph {
         let map_key = read_string(pos, endianness).unwrap();
         if let Some(&map_type_flag) = pos.next() {
             let map_type = property_type_index_to_type(map_type_flag);
-            self.edge_properties.key_to_type.insert(map_key.clone(), map_type.clone());
+            self.edge_properties
+                .key_to_type
+                .insert(map_key.clone(), map_type.clone());
             match map_type {
                 PropertyType::Bool => {
                     let mut property_map = HashMap::new();
@@ -505,5 +513,3 @@ impl PropertyMapsReader for GraphToolGraph {
         }
     }
 }
-
-

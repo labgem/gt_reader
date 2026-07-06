@@ -6,13 +6,10 @@
 
 /* project use */
 
-
 /// Enum to define error
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
-    MismatchedLength {
-        expect: usize,
-    }
+    MismatchedLength { expect: usize },
 }
 
 /// Alias of result

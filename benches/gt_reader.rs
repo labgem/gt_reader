@@ -9,7 +9,7 @@ pub fn gt_reader_bench(c: &mut criterion::Criterion) {
     let gt_file = "../tests/test_data/pgp_simple_graph_without_properties.gt";
 
     c.bench_function("gt_reader", |b| {
-        criterion::black_box({gt_reader::read_gt(gt_file)})
+        criterion::black_box({ gt_reader::read_gt(gt_file) })
     });
 }
 
@@ -22,4 +22,3 @@ config = criterion::Criterion::default()               // Check https://docs.rs/
 targets = gt_reader_bench
 }
 criterion::criterion_main!(benches);
-

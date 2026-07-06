@@ -231,11 +231,14 @@ pub fn read_n_successors(
     let mut successors: Vec<usize> = Vec::with_capacity(n_successors);
     for _nodes in 0..n_successors {
         let node_identifier_buffer = take_n_bytes(pos, n_bytes_per_node_identifier);
-        successors.push(bytes_to_int::<u64>(
-            &node_identifier_buffer,
-            endianness,
-            n_bytes_per_node_identifier,
-        ).unwrap() as usize);
+        successors.push(
+            bytes_to_int::<u64>(
+                &node_identifier_buffer,
+                endianness,
+                n_bytes_per_node_identifier,
+            )
+            .unwrap() as usize,
+        );
     }
     Ok(successors)
 }
@@ -263,5 +266,3 @@ pub fn read_edges(
     }
     Ok(edges)
 }
-
-
