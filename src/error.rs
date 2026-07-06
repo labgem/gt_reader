@@ -6,9 +6,14 @@
 
 /* project use */
 
+
 /// Enum to define error
-#[derive(std::fmt::Debug, thiserror::Error)]
-pub enum Error {}
+#[derive(Debug, PartialEq, Eq)]
+pub enum Error {
+    MismatchedLength {
+        expect: usize,
+    }
+}
 
 /// Alias of result
 pub type Result<T> = core::result::Result<T, Error>;

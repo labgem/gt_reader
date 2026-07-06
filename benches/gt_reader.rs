@@ -1,7 +1,6 @@
 //! Measure gt reading function execution time
 
 /* std use */
-
 /* crate use */
 
 /* project use */
