@@ -1,0 +1,43 @@
+stages:
+  - test
+  - lint
+  - publish
+
+test:
+  stage: test
+  image: rust:latest
+  script:
+    - cargo build --verbose
+    - cargo test --all-features --verbose
+
+fmt:
+  stage: lint
+  image: rust:latest
+  script:
+    - rustup component add rustfmt
+    - rustup component add clippy
+    - cargo fmt --all --check
+    - cargo clippy --all-targets -- -D warnings
+
+
+coverage:
+  image: rust:latest
+  script:
+    - cargo 
+
+msrv:
+  stage: lint
+  image: rust:latest
+  script:
+    - |
+      msrv=$(grep 'rust-version' Cargo.toml | sed 's/rust-version = \"\([0-9\.]*\)\"/\1/')
+      grep "$msrv" README.md
+
+page:
+  stage: publish
+  image: rust:latest
+  script:
+    - cargo doc
+    - cargo install mdbook
+    - mdbook build
+  pages: true
